@@ -5,9 +5,9 @@
 #ifndef PERGUNTA_H
 #define PERGUNTA_H
 
-#define TAM_ENUNCIADO    256 /**< Tamanho maximo do enunciado */
-#define TAM_ALTERNATIVA  100 /**< Tamanho maximo de cada alternativa */
-#define NUM_ALTERNATIVAS 4   /**< Quantidade de alternativas (A, B, C, D) */
+#define TAM_ENUNCIADO 256   /**< Tamanho maximo do enunciado */
+#define TAM_ALTERNATIVA 100 /**< Tamanho maximo de cada alternativa */
+#define NUM_ALTERNATIVAS 4  /**< Quantidade de alternativas (A, B, C, D) */
 
 /**
  * @brief Niveis de dificuldade das perguntas.
@@ -91,5 +91,12 @@ int excluirPergunta(ListaPerguntas *lista, int indice);
  * @param lista Ponteiro para a lista.
  */
 void liberarLista(ListaPerguntas *lista);
+
+/**
+ * @brief Mostra as perguntas de um nivel, uma por vez, com navegacao.
+ * @param lista Lista com as perguntas.
+ * @param nivel Nivel de dificuldade (1 a 5).
+ */
+void visualizarPorNivel(const ListaPerguntas *lista, int nivel);
 
 #endif

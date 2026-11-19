@@ -7,29 +7,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pergunta.h"
+#include "arquivo.h"
+#include "interface.h"
 
+/**
+ * @brief Funcao principal do Jogo do Milhao.
+ *
+ * Carrega as perguntas (binario ou CSV na primeira execucao),
+ * mostra o menu ate o usuario sair e salva tudo no binario ao final.
+ *
+ * @return 0 se o programa terminou normalmente, 1 em caso de erro de memoria.
+ */
 int main(void) {
     ListaPerguntas lista;
     int opcao;
 
+    iniciarInterface();
+
     if (!criarLista(&lista, 2)) {
-        printf("Erro de memoria\n");
+        mostrarErro("Erro de memoria");
         return 1;
+    }
+    if (!carregarBinario(&lista, "dados/perguntas.dat")) {
+        carregarCSV(&lista, "dados/perguntas.csv"); /* 1a execucao: binario ainda nao existe */
     }
 
     do {
-        printf("\n=== JOGO DO MILHAO ===\n");
+        printf(COR_AMARELO "\n=== JOGO DO MILHAO ===\n" COR_RESET);
         printf("1 - Inserir\n");
         printf("2 - Listar\n");
         printf("3 - Pesquisar\n");
         printf("4 - Alterar\n");
         printf("5 - Excluir\n");
+        printf("6 - Exportar CSV\n");
+        printf("7 - Ver por nivel\n");
         printf("0 - Sair\n");
         printf("Opcao: ");
         if (scanf("%d", &opcao) != 1) {
-        while (getchar() != '\n');   /* joga fora o que foi digitado */
-        opcao = -1;                  /* cai no "Opcao invalida!" */
-}
+            while (getchar() != '\n'); /* joga fora o que foi digitado */
+            opcao = -1;                /* cai no "Opcao invalida!" */
+        }
         switch (opcao) {
 
             case 1: {
@@ -44,7 +61,7 @@ int main(void) {
                     scanf("%d", &nivel);
 
                     if (nivel < 1 || nivel > 5)
-                        printf("Nivel invalido!\n");
+                        mostrarErro("Nivel invalido!");
 
                 } while (nivel < 1 || nivel > 5);
 
@@ -63,14 +80,14 @@ int main(void) {
                         nova.correta -= 32;
 
                     if (nova.correta < 'A' || nova.correta > 'D')
-                        printf("Letra invalida!\n");
+                        mostrarErro("Letra invalida!");
 
                 } while (nova.correta < 'A' || nova.correta > 'D');
 
                 if (inserirPergunta(&lista, nova))
-                    printf("Pergunta inserida!\n");
+                    mostrarSucesso("Pergunta inserida!");
                 else
-                    printf("Erro ao inserir!\n");
+                    mostrarErro("Erro ao inserir!");
 
                 break;
             }
@@ -88,9 +105,9 @@ int main(void) {
                 int indice = pesquisarPergunta(&lista, texto);
 
                 if (indice != -1)
-                    printf("Pergunta encontrada: numero %d\n", indice + 1);
+                    printf(COR_CIANO "Pergunta encontrada: numero %d\n" COR_RESET, indice + 1);
                 else
-                    printf("Pergunta nao encontrada!\n");
+                    mostrarErro("Pergunta nao encontrada!");
 
                 break;
             }
@@ -111,7 +128,7 @@ int main(void) {
                     scanf("%d", &nivel);
 
                     if (nivel < 1 || nivel > 5)
-                        printf("Nivel invalido!\n");
+                        mostrarErro("Nivel invalido!");
 
                 } while (nivel < 1 || nivel > 5);
 
@@ -130,14 +147,14 @@ int main(void) {
                         nova.correta -= 32;
 
                     if (nova.correta < 'A' || nova.correta > 'D')
-                        printf("Letra invalida!\n");
+                        mostrarErro("Letra invalida!");
 
                 } while (nova.correta < 'A' || nova.correta > 'D');
 
                 if (alterarPergunta(&lista, numero - 1, nova))
-                    printf("Pergunta alterada!\n");
+                    mostrarSucesso("Pergunta alterada!");
                 else
-                    printf("Numero invalido!\n");
+                    mostrarErro("Numero invalido!");
 
                 break;
             }
@@ -149,10 +166,31 @@ int main(void) {
                 scanf("%d", &numero);
 
                 if (excluirPergunta(&lista, numero - 1))
-                    printf("Pergunta excluida!\n");
+                    mostrarSucesso("Pergunta excluida!");
                 else
-                    printf("Numero invalido!\n");
+                    mostrarErro("Numero invalido!");
 
+                break;
+            }
+
+            case 6: {
+
+                if (exportarCSV(&lista, "dados/exportado.csv"))
+                    mostrarSucesso("Exportado para dados/exportado.csv!");
+                else
+                    mostrarErro("Erro ao exportar!");
+                break;
+            }
+
+            case 7: {
+                int nivel;
+                printf("Nivel (1-5): ");
+                if (scanf("%d", &nivel) != 1 || nivel < 1 || nivel > 5) {
+                    while (getchar() != '\n');
+                    mostrarErro("Nivel invalido!");
+                    break;
+                }
+                visualizarPorNivel(&lista, nivel);
                 break;
             }
 
@@ -161,11 +199,12 @@ int main(void) {
                 break;
 
             default:
-                printf("Opcao invalida!\n");
+                mostrarErro("Opcao invalida!");
         }
 
     } while (opcao != 0);
 
+    salvarBinario(&lista, "dados/perguntas.dat");
     liberarLista(&lista);
 
     return 0;
