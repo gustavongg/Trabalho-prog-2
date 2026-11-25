@@ -17,6 +17,16 @@
 void iniciarInterface(void);
 
 /**
+ * @brief Le um numero inteiro digitado pelo usuario sem travar com letras.
+ *
+ * Sempre descarta o resto da linha, para que letras digitadas por engano
+ * nao fiquem presas na entrada e atrapalhem a proxima leitura.
+ *
+ * @return O numero digitado, -1 se nao foi digitado um numero, ou 0 se a entrada acabou.
+ */
+int lerInteiro(void);
+
+/**
  * @brief Mostra uma mensagem de erro em vermelho com beep grave.
  * @param mensagem Texto a ser exibido.
  */

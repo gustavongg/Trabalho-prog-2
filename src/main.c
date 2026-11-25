@@ -9,6 +9,9 @@
 #include "pergunta.h"
 #include "arquivo.h"
 #include "interface.h"
+#include "jogo.h"
+#include "janela.h"
+#include "ranking.h"
 
 /**
  * @brief Funcao principal do Jogo do Milhao.
@@ -33,20 +36,30 @@ int main(void) {
     }
 
     do {
-        printf(COR_AMARELO "\n=== JOGO DO MILHAO ===\n" COR_RESET);
-        printf("1 - Inserir\n");
-        printf("2 - Listar\n");
-        printf("3 - Pesquisar\n");
-        printf("4 - Alterar\n");
-        printf("5 - Excluir\n");
-        printf("6 - Exportar CSV\n");
-        printf("7 - Ver por nivel\n");
-        printf("0 - Sair\n");
-        printf("Opcao: ");
-        if (scanf("%d", &opcao) != 1) {
-            while (getchar() != '\n'); /* joga fora o que foi digitado */
-            opcao = -1;                /* cai no "Opcao invalida!" */
-        }
+        /* Menu no tema da pescaria; so caracteres ASCII para nao quebrar no terminal do Windows */
+        printf(COR_CIANO "\n        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" COR_RESET);
+        printf(COR_AMARELO "             J O G O   D O   M I L H A O\n" COR_RESET);
+        printf(COR_CIANO   "                ><(((('>   pesca do CR7\n" COR_RESET);
+        printf(COR_CIANO "        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" COR_RESET);
+        printf("        +--------------------------------------+\n");
+        printf("        |" COR_AMARELO "  CAIXA DE ISCAS (perguntas)          " COR_RESET "|\n");
+        printf("        |   1 - Inserir pergunta               |\n");
+        printf("        |   2 - Listar perguntas               |\n");
+        printf("        |   3 - Pesquisar pergunta             |\n");
+        printf("        |   4 - Alterar pergunta               |\n");
+        printf("        |   5 - Excluir pergunta               |\n");
+        printf("        |   6 - Exportar para CSV              |\n");
+        printf("        |   7 - Ver perguntas por nivel        |\n");
+        printf("        +--------------------------------------+\n");
+        printf("        |" COR_VERDE "  NA BEIRA DO RIO                     " COR_RESET "|\n");
+        printf("        |   8 - Ir pescar (Jogar)              |\n");
+        printf("        |   9 - Mural dos pescadores (Ranking) |\n");
+        printf("        +--------------------------------------+\n");
+        printf("        |" COR_VERMELHO "   0 - Recolher a vara (Sair)         " COR_RESET "|\n");
+        printf("        +--------------------------------------+\n");
+        printf(COR_CIANO "Equipe: Gustavo Nicole Geraldo, Joao Pedro Rodrigues Ribeiro e Joao Pedro Damiao\n" COR_RESET);
+        printf("Escolha sua isca: ");
+        opcao = lerInteiro(); /* letras viram -1 e caem no "Opcao invalida!" */
         switch (opcao) {
 
             case 1: {
@@ -58,7 +71,7 @@ int main(void) {
 
                 do {
                     printf("Digite o nivel (1-5): ");
-                    scanf("%d", &nivel);
+                    nivel = lerInteiro();
 
                     if (nivel < 1 || nivel > 5)
                         mostrarErro("Nivel invalido!");
@@ -118,14 +131,18 @@ int main(void) {
                 Pergunta nova;
 
                 printf("Digite o numero da pergunta que deseja alterar: ");
-                scanf("%d", &numero);
+                numero = lerInteiro();
+                if (numero < 1 || numero > lista.quantidade) { /* avisa antes de pedir os novos dados */
+                    mostrarErro("Numero invalido!");
+                    break;
+                }
 
                 printf("Digite o novo enunciado: ");
                 scanf(" %199[^\n]", nova.enunciado);
 
                 do {
                     printf("Digite o novo nivel (1-5): ");
-                    scanf("%d", &nivel);
+                    nivel = lerInteiro();
 
                     if (nivel < 1 || nivel > 5)
                         mostrarErro("Nivel invalido!");
@@ -163,7 +180,7 @@ int main(void) {
                 int numero;
 
                 printf("Digite o numero da pergunta que deseja excluir: ");
-                scanf("%d", &numero);
+                numero = lerInteiro();
 
                 if (excluirPergunta(&lista, numero - 1))
                     mostrarSucesso("Pergunta excluida!");
@@ -185,14 +202,30 @@ int main(void) {
             case 7: {
                 int nivel;
                 printf("Nivel (1-5): ");
-                if (scanf("%d", &nivel) != 1 || nivel < 1 || nivel > 5) {
-                    while (getchar() != '\n');
+                nivel = lerInteiro();
+                if (nivel < 1 || nivel > 5) {
                     mostrarErro("Nivel invalido!");
                     break;
                 }
                 visualizarPorNivel(&lista, nivel);
                 break;
             }
+
+            case 8: {
+                int premio = jogarJanela(&lista);
+
+                if (premio > 0) {
+                    char nome[30];
+                    printf("Seu nome para o ranking: ");
+                    scanf(" %29[^\n]", nome);
+                    salvarNoRanking(nome, premio);
+                }
+                break;
+            }
+
+            case 9:
+                mostrarRanking();
+                break;
 
             case 0:
                 printf("Saindo...\n");

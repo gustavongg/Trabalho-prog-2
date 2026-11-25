@@ -1,0 +1,7 @@
+output/*.o
+output/jogo_do_milhao
+output/jogo_do_milhao.exe
+dados/perguntas.dat
+dados/exportado.csv
+dados/ranking.txt
+.vscode/

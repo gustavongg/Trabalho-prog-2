@@ -1,5 +1,6 @@
 # Makefile do Jogo do Milhao
 # Uso: make (compila) | make run (executa) | make clean (limpa)
+# Precisa da raylib instalada (parte grafica do jogo).
 
 CC      = gcc
 CFLAGS  = -Wall -Wextra -std=c99 -g
@@ -11,29 +12,32 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OUT_DIR)/%.o,$(SRCS))
 
 ifeq ($(OS),Windows_NT)
-    TARGET := $(TARGET).exe
-    RM     = del /Q
-    FIXPATH = $(subst /,\,$1)
-    MKDIR  = if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+    # Windows: raylib instalada pelo instalador oficial em C:\raylib
+    RAYLIB_DIR ?= C:/raylib/raylib/src
+    CFLAGS  += -I$(RAYLIB_DIR)
+    # Compile com o make do w64devkit (C:\raylib\w64devkit\bin), que ja tem rm e sh
+    TARGET  := $(TARGET).exe
+    LDLIBS   = -L$(RAYLIB_DIR) -lraylib -lopengl32 -lgdi32 -lwinmm
 else
-    RM     = rm -f
-    FIXPATH = $1
-    MKDIR  = mkdir -p $(OUT_DIR)
+    # Linux: raylib instalada no sistema (ex.: /usr/local/lib)
+    LDLIBS   = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 endif
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
-$(OUT_DIR)/%.o: $(SRC_DIR)/%.c
-	@$(MKDIR)
+$(OUT_DIR):
+	mkdir $(OUT_DIR)
+
+$(OUT_DIR)/%.o: $(SRC_DIR)/%.c | $(OUT_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run: all
-	$(call FIXPATH,./$(TARGET))
+	./$(TARGET)
 
 clean:
-	-$(RM) $(call FIXPATH,$(OUT_DIR)/*.o) $(call FIXPATH,$(TARGET))
+	rm -f $(OUT_DIR)/*.o $(TARGET)
 
 .PHONY: all run clean
